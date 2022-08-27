@@ -59,9 +59,7 @@ const User = sequelize.define('users', {
  password: {
   type: DataTypes.STRING,
   allowNull: false,
-  unique: {
-   msg: 'This Password is already taken.'
-  }
+  unique: true
  },
  
  full_name: {

@@ -45,39 +45,28 @@ const welcomeMessage = (request, response) => {
 
 // Register Method.
 const register = async(request, response) => {
- try {
-  const { error } = userRegistrationValidation(request.body);
+ 
+  let { error } = userRegistrationValidation(request.body);
   if(error) {
-   response.status(400).json({ message: `${error.details[0].message}`})
+    response.status(400).json({ message: `${ error.details[0].message }` })
   } else {
-   const userAlreadyRegistered = await User.findOne({ email: request.body.email });
-   if(userAlreadyRegistered) {
-    response.status(400).json({ message: `User with email address ${userAlreadyRegistered.email} already exists.`})
-   } else {
-    const salt = await bcrypt.genSalt(15);
-    const hash = await bcrypt.hash(request.body.password, salt);
-    const user = User.create({
-     first_name: request.body.first_name,
-     other_names: request.body.other_names,
-     last_name: request.body.last_name,
-     email: request.body.email,
-     username: request.body.username,
-     image: request.file.filename,
-     password: hash
+    const user = await User.create({
+      first_name: request.body.first_name,
+      other_names: request.body.other_names,
+      last_name: request.body.last_name,
+      email: request.body.email,
+      username: request.body.username,
+      image: request.file.filename,
+      password: request.body.password,
     });
-    await user
-     .then((user) => { response.status(200).json({ message: user }) })
-     .catch((error) => { response.status(500).json({ message: `${error.message}`})})
-   };
+
+    if(user) {
+      response.status(200).json({ message: user })
+    } else {
+      console.log({ name: error.name, message: error.message, stack: error.stack })
+    }
   }
- } catch (error) {
-  console.log({
-   name: error.name,
-   message: error.message,
-   stack: error.stack,
-  });
-  response.status(500).json({ message: 'Server Error: ' + error.message });
- }
+  
 };
 
 // Login Method.
